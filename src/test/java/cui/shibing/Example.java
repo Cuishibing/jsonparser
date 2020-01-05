@@ -1,6 +1,6 @@
-# 一个简单的Json解析器
-## 如何使用
-````java
+package cui.shibing;
+
+import cui.shibing.json.JsonArray;
 import cui.shibing.json.JsonObject;
 
 public class Example {
@@ -19,12 +19,3 @@ public class Example {
         System.out.println(jsonArray.getDouble(3));
     }
 }
-````
-目前存在的问题：
-- 解析数字时，整数都解析成`Long`类型
-- 对于json语法错误，错误信息不够详细
-
-下一步要做的：
-- 语法错误信息更加详细
-- 提供解析时的拦截器机制，用户可以自己处理解析到的值；提供一些基础的拦截器，比如：整数、浮点数的类型处理等
-- 直接把json串映射到某个Bean
