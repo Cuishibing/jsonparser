@@ -1,8 +1,6 @@
 # 一个简单的Json解析器
 ## 如何使用
 ````java
-import cui.shibing.json.JsonObject;
-
 public class Example {
     public static void main(String[] args) {
         String json = "{\"name\":\"aabbccdd\",\"age\":23}";
@@ -17,6 +15,11 @@ public class Example {
         JsonArray jsonArray = JsonArray.parseJsonArray(json);
         System.out.println(jsonArray.getLong(0));
         System.out.println(jsonArray.getDouble(3));
+
+        // read json from a uri
+        URI jsonUri = new URI("file:///c:/Users/Cuishibing/Desktop/temp/temp.json");
+        jsonObject = JsonObject.parseJsonObject(jsonUri);
+        System.out.println(jsonObject.getString("name"));
     }
 }
 ````
