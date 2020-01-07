@@ -85,7 +85,11 @@ public class JsonObject {
     }
 
     public static JsonObject parseJsonObject(String json) {
-        return parseJsonObject(new InputStreamReader(new ByteArrayInputStream(json.getBytes())));
+        return parseJsonObject(json,JsonConfig.getDefaultConfig());
+    }
+
+    public static JsonObject parseJsonObject(String json, JsonConfig config) {
+        return parseJsonObject(new InputStreamReader(new ByteArrayInputStream(json.getBytes())),config);
     }
 
     public static JsonObject parseJsonObject(URI uri) throws IOException {

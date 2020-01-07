@@ -1,13 +1,12 @@
 package cui.shibing.parser;
 
 import cui.shibing.config.JsonConfig;
+import cui.shibing.intercepter.Interceptor;
 import cui.shibing.json.JsonArray;
 import cui.shibing.json.JsonObject;
 import cui.shibing.scanner.JsonTokenScanner;
-import cui.shibing.token.BooleanValueToken;
 import cui.shibing.token.JsonToken;
 import cui.shibing.token.JsonToken.TokenType;
-import cui.shibing.token.NumberValueToken;
 
 import java.io.IOException;
 
@@ -16,15 +15,15 @@ import java.io.IOException;
  */
 public final class JsonParser {
 
-    protected JsonTokenScanner scanner;
+    private JsonTokenScanner scanner;
 
-    protected JsonConfig config;
+    private JsonConfig config;
 
     public JsonParser(JsonTokenScanner scanner) {
-        this(scanner,JsonConfig.getDefaultConfig());
+        this(scanner, JsonConfig.getDefaultConfig());
     }
 
-    public JsonParser(JsonTokenScanner scanner,JsonConfig config) {
+    public JsonParser(JsonTokenScanner scanner, JsonConfig config) {
         this.scanner = scanner;
         this.config = config;
     }
@@ -44,6 +43,14 @@ public final class JsonParser {
             scanner.nextToken(TokenType.COLON);
             token = scanner.nextToken();
             switch (token.getType()) {
+                case STR:
+                case NUMBER:
+                case BOOLEAN:
+                    jsonObject.set(key, getTokenValue(token));
+                    break;
+                case NULL:
+                    jsonObject.set(key, null);
+                    break;
                 case LEFT_CURLY_BRACE:
                     scanner.rewindToken(token);
                     jsonObject.set(key, parseJsonObject());
@@ -52,20 +59,9 @@ public final class JsonParser {
                     scanner.rewindToken(token);
                     jsonObject.set(key, parseJsonArray());
                     break;
-                case STR:
-                    jsonObject.set(key, token.getContent());
-                    break;
-                case NUMBER:
-                    jsonObject.set(key, ((NumberValueToken) token).getNumber(config));
-                    break;
-                case BOOLEAN:
-                    jsonObject.set(key, ((BooleanValueToken) token).getBoolean());
-                    break;
-                case NULL:
-                    jsonObject.set(key, null);
-                    break;
                 default:
-                    throw new RuntimeException("syntax error: invalid token " + token.getContent() + " line: " + scanner.getLine());
+                    throw new RuntimeException(String.format("line [%s]: syntax error, invalid token type [%s]",
+                            scanner.getLine(), token.getType()));
             }
         } while ((token = scanner.nextToken()).getType() == TokenType.COMMA);
 
@@ -81,13 +77,9 @@ public final class JsonParser {
 
             switch (token.getType()) {
                 case STR:
-                    jsonArray.add(token.getContent());
-                    break;
                 case NUMBER:
-                    jsonArray.add(((NumberValueToken) token).getNumber());
-                    break;
                 case BOOLEAN:
-                    jsonArray.add(((BooleanValueToken) token).getBoolean());
+                    jsonArray.add(getTokenValue(token));
                     break;
                 case NULL:
                     jsonArray.add(null);
@@ -103,19 +95,38 @@ public final class JsonParser {
                 case RIGHT_BRACKET:
                     return jsonArray;
                 default:
-                    throw new RuntimeException("syntax error: invalid token " + token.getContent() + " line: " + scanner.getLine());
+                    throw new RuntimeException(String.format("line [%s]: syntax error, invalid token type [%s]",
+                            scanner.getLine(), token.getType()));
             }
         } while ((token = scanner.nextToken()).getType() == TokenType.COMMA);
         matchTokenType(token, TokenType.RIGHT_BRACKET);
         return jsonArray;
     }
 
+    /**
+     * invoke token interceptor
+     * <p>
+     * if interceptor is null for one token type then get the interceptor from the default config.
+     */
+    private Object getTokenValue(JsonToken token) {
+        Interceptor<?> interceptor = config.getInterceptor(token.getType());
+        if (interceptor == null) {
+            interceptor = JsonConfig.getDefaultConfig().getInterceptor(token.getType());
+        }
+        return interceptor.onToken(token);
+    }
+
+    /**
+     * test given json token' type whether or not match the expect,if not then throw a exception.
+     */
     private void matchTokenType(JsonToken token, TokenType type) {
         if (token == null) {
-            throw new RuntimeException("syntax error: no more token" + " line: " + scanner.getLine());
+            throw new RuntimeException(String.format("line [%s]: syntax error, expect token [%s] but no more token",
+                    scanner.getLine(), type.name()));
         }
         if (token.getType() != type) {
-            throw new RuntimeException("syntax error: " + token.getContent() + " line: " + scanner.getLine());
+            throw new RuntimeException(String.format("line [%s]: syntax error, expect token [%s] but [%s]",
+                    scanner.getLine(), type.name(), token.getType().name()));
         }
     }
 

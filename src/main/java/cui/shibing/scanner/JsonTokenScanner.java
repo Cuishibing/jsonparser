@@ -26,13 +26,13 @@ public final class JsonTokenScanner {
     protected Deque<JsonToken> tokenRewindBuffer = new ArrayDeque<>(1);
 
     @Getter
-    protected int line;
+    protected int line = 1;
 
     public JsonTokenScanner(Reader reader) {
         this.reader = reader;
         buffer.flip();
     }
-    
+
     private boolean isDigital(char c) {
         return c >= '0' && c <= '9';
     }
@@ -40,27 +40,27 @@ public final class JsonTokenScanner {
     private char escapeChar() throws IOException {
         Character c = readChar();
         switch (c) {
-        case '"':
-            return '"';
-        case '\\':
-            return '\\';
-        case '/':
-            return '/';
-        case 'b':
-            return '\b';
-        case 'f':
-            return '\f';
-        case 'n':
-            return '\n';
-        case 'r':
-            return '\r';
-        case 't':
-            return '\t';
-        case 'u': {
-            return readUnicodePoint();
-        }
-        default:
-            throw new RuntimeException();
+            case '"':
+                return '"';
+            case '\\':
+                return '\\';
+            case '/':
+                return '/';
+            case 'b':
+                return '\b';
+            case 'f':
+                return '\f';
+            case 'n':
+                return '\n';
+            case 'r':
+                return '\r';
+            case 't':
+                return '\t';
+            case 'u': {
+                return readUnicodePoint();
+            }
+            default:
+                throw new RuntimeException(String.format("line [%s]: syntax error, not support escape char [%s]", line, c));
         }
     }
 
@@ -74,7 +74,7 @@ public final class JsonTokenScanner {
         if (c >= 'A' && c <= 'F') {
             return c - 'A' + 10;
         }
-        throw new RuntimeException("syntax error: " + line);
+        throw new RuntimeException(String.format("line [%s]: syntax error, invalid unicode point code [%s]", line, c));
     }
 
     private char readUnicodePoint() throws IOException {
@@ -91,7 +91,7 @@ public final class JsonTokenScanner {
         StringBuilder builder = new StringBuilder();
         while (true) {
             switch (state) {
-                case 0:{
+                case 0: {
                     readChar = readChar();
                     if (readChar == '-') {
                         builder.append(readChar);
@@ -103,18 +103,18 @@ public final class JsonTokenScanner {
                         state = 2;
                         break;
                     }
-                    throw new RuntimeException();
+                    throw new RuntimeException(String.format("line [%s]: syntax error, invalid number char [%s]", line, readChar));
                 }
-                case 1:{
+                case 1: {
                     readChar = readChar();
                     if (isDigital(readChar)) {
                         builder.append(readChar);
                         state = 2;
                         break;
                     }
-                    throw new RuntimeException();
+                    throw new RuntimeException(String.format("line [%s]: syntax error, invalid number char [%s]", line, readChar));
                 }
-                case 2:{
+                case 2: {
                     readChar = readChar();
                     if (isDigital(readChar)) {
                         builder.append(readChar);
@@ -127,9 +127,9 @@ public final class JsonTokenScanner {
                         break;
                     }
                     buffer.position(buffer.position() - 1);
-                    return new NumberValueToken(builder.toString(),false);
+                    return new NumberValueToken(builder.toString(), false);
                 }
-                case 3:{
+                case 3: {
                     readChar = readChar();
                     if (isDigital(readChar)) {
                         builder.append(readChar);
@@ -142,9 +142,9 @@ public final class JsonTokenScanner {
                         break;
                     }
                     buffer.position(buffer.position() - 1);
-                    return new NumberValueToken(builder.toString(),true);
+                    return new NumberValueToken(builder.toString(), true);
                 }
-                case 4 :{
+                case 4: {
                     readChar = readChar();
                     if (readChar == '+' || readChar == '-') {
                         builder.append(readChar);
@@ -156,16 +156,16 @@ public final class JsonTokenScanner {
                         state = 6;
                         break;
                     }
-                    throw new RuntimeException();
+                    throw new RuntimeException(String.format("line [%s]: syntax error, invalid number char [%s]", line, readChar));
                 }
-                case 5 : {
+                case 5: {
                     readChar = readChar();
                     if (isDigital(readChar)) {
                         builder.append(readChar);
                         state = 6;
                         break;
                     }
-                    throw new RuntimeException();
+                    throw new RuntimeException(String.format("line [%s]: syntax error, invalid number char [%s]", line, readChar));
                 }
                 case 6: {
                     readChar = readChar();
@@ -175,9 +175,8 @@ public final class JsonTokenScanner {
                         break;
                     }
                     buffer.position(buffer.position() - 1);
-                    return new NumberValueToken(builder.toString(),true);
+                    return new NumberValueToken(builder.toString(), true);
                 }
-                default:throw new RuntimeException();
             }
         }
     }
@@ -188,11 +187,13 @@ public final class JsonTokenScanner {
 
     public JsonToken nextToken(JsonToken.TokenType type) throws IOException {
         JsonToken token = nextToken();
-        if (token == null ) {
-            throw new RuntimeException("syntax error");
+        if (token == null) {
+            throw new RuntimeException(String.format("line [%s]: syntax error, expect token [%s] but no more token",
+                    line, type.name()));
         }
         if (token.getType() != type) {
-            throw new RuntimeException("syntax error");
+            throw new RuntimeException(String.format("line [%s]: syntax error, expect token [%s] but [%s]",
+                    line, type.name(), token.getType().name()));
         }
         return token;
     }
@@ -213,79 +214,82 @@ public final class JsonTokenScanner {
         } while (readChar == ' ' || readChar == '\t' || readChar == '\r' || readChar == '\n');
 
         switch (readChar) {
-        case '{':
-            return JsonToken.LEFT_CURLY_BRACE;
-        case '}':
-            return JsonToken.RIGHT_CURLY_BRACE;
-        case '[':
-            return JsonToken.LEFT_BRACKET;
-        case ']':
-            return JsonToken.RIGHT_BRACKET;
-        case ':':
-            return JsonToken.COLON;
-        case ',':
-            return JsonToken.COMMA;
-        case '"': {
-            StringBuilder builder = new StringBuilder();
-            do {
-                readChar = readChar();
-                if (readChar == '\\') {
-                    builder.append(escapeChar());
-                } else if (readChar != '"') {
-                    builder.append(readChar);
-                }
-            } while (readChar != '"');
-            return new StringValueToken(builder.toString());
-        }
-        default: {
-            switch (readChar) {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                case '-':{
-                    buffer.position(buffer.position() - 1);
-                    return readNumberToken();
-                }
-                case 't':
-                case 'f':{
-                    int counter = readChar == 't' ? 3 : 4;
-                    StringBuilder builder = new StringBuilder();
-                    builder.append(readChar);
-                    while (counter-- > 0) {
-                        readChar = readChar();
+            case '{':
+                return JsonToken.LEFT_CURLY_BRACE;
+            case '}':
+                return JsonToken.RIGHT_CURLY_BRACE;
+            case '[':
+                return JsonToken.LEFT_BRACKET;
+            case ']':
+                return JsonToken.RIGHT_BRACKET;
+            case ':':
+                return JsonToken.COLON;
+            case ',':
+                return JsonToken.COMMA;
+            case '"': {
+                StringBuilder builder = new StringBuilder();
+                do {
+                    readChar = readChar();
+                    if (readChar == '\\') {
+                        builder.append(escapeChar());
+                    } else if (readChar != '"') {
                         builder.append(readChar);
                     }
-                    BooleanValueToken t = new BooleanValueToken(builder.toString());
-                    if (t.validBooleanValue()) {
-                        return t;
-                    } else {
-                        throw new RuntimeException();
-                    }
-                }
-                case 'n':{
-                    StringBuilder builder = new StringBuilder();
-                    builder.append(readChar);
-                    int counter = 3;
-                    while (counter-- > 0) {
-                        readChar = readChar();
-                        builder.append(readChar);
-                    }
-                    if (JsonToken.NULL.getContent().equals(builder.toString())) {
-                        return JsonToken.NULL;
-                    } else {
-                        throw new RuntimeException();
-                    }
-                }
+                } while (readChar != '"');
+                return new StringValueToken(builder.toString());
             }
-            throw new RuntimeException("syntax error: invalid token " + readChar + " line: " + getLine());
-        }
+            default: {
+                switch (readChar) {
+                    case '0':
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                    case '-': {
+                        buffer.position(buffer.position() - 1);
+                        return readNumberToken();
+                    }
+                    case 't':
+                    case 'f': {
+                        int counter = readChar == 't' ? 3 : 4;
+                        StringBuilder builder = new StringBuilder();
+                        builder.append(readChar);
+                        while (counter-- > 0) {
+                            readChar = readChar();
+                            builder.append(readChar);
+                        }
+                        BooleanValueToken t = new BooleanValueToken(builder.toString());
+                        if (t.validBooleanValue()) {
+                            return t;
+                        } else {
+                            throw new RuntimeException(String.format("line [%s]: syntax error, invalid bool value [%s]",
+                                    line, t.getContent()));
+                        }
+                    }
+                    case 'n': {
+                        StringBuilder builder = new StringBuilder();
+                        builder.append(readChar);
+                        int counter = 3;
+                        while (counter-- > 0) {
+                            readChar = readChar();
+                            builder.append(readChar);
+                        }
+                        if (JsonToken.NULL.getContent().equals(builder.toString())) {
+                            return JsonToken.NULL;
+                        } else {
+                            throw new RuntimeException(String.format("line [%s]: syntax error, invalid null value [%s]",
+                                    line, builder.toString()));
+                        }
+                    }
+                }
+                throw new RuntimeException(String.format("line [%s]: syntax error, invalid char [%s]",
+                        line, readChar));
+            }
         }
 
     }

@@ -1,10 +1,6 @@
 package cui.shibing.token;
 
-import cui.shibing.config.JsonConfig;
 import lombok.Setter;
-import org.omg.CORBA.PUBLIC_MEMBER;
-
-import java.math.BigDecimal;
 
 /**
  * NumberValueToken
@@ -27,14 +23,7 @@ public class NumberValueToken extends JsonToken {
     }
 
     public Number getNumber() {
-        return getNumber(JsonConfig.getDefaultConfig());
-    }
-
-    public Number getNumber(JsonConfig config) {
         if (isFloat) {
-            if (config.isPreferBigDecimal()) {
-                return new BigDecimal(content);
-            }
             return Double.valueOf(content);
         } else {
             return Long.valueOf(content);
