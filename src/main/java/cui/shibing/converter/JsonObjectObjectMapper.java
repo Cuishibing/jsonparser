@@ -5,6 +5,7 @@ import cui.shibing.converter.reflection.ReflectionUtils;
 import cui.shibing.json.JsonObject;
 
 import java.lang.reflect.Field;
+import java.util.Map;
 
 public class JsonObjectObjectMapper extends AbstractObjectMapper implements ObjectMapper {
 
@@ -12,11 +13,11 @@ public class JsonObjectObjectMapper extends AbstractObjectMapper implements Obje
         super(config);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Object map(Object source, Class<?> clazz) throws IllegalAccessException, InstantiationException {
-        Object instance = clazz.newInstance();
+    public <T> T map(Object source, Class<?> clazz) throws IllegalAccessException, InstantiationException {
         JsonObject jsonObject = (JsonObject) source;
-
+        Object instance = clazz.newInstance();
         for (String k : jsonObject.keySet()) {
             ReflectionUtils.ClassInfo classInfo = ReflectionUtils.getClassInfo(clazz);
             Object field = classInfo.getField(k);
@@ -27,7 +28,7 @@ public class JsonObjectObjectMapper extends AbstractObjectMapper implements Obje
             Field f = (Field) field;
             classInfo.setValue(f, instance, mapValue(jsonObject.get(k), f.getType()));
         }
-        return instance;
+        return (T)instance;
     }
 
 }

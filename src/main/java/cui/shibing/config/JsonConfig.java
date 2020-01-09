@@ -16,6 +16,8 @@ import java.util.Properties;
 
 public final class JsonConfig extends Properties {
 
+    private static final long serialVersionUID = 1L;
+
     private static final JsonConfig DEFAULT_CONFIG = new JsonConfig();
 
     private final Map<JsonToken.TokenType, Interceptor<?>> interceptorRegistry = new HashMap<>();
@@ -51,7 +53,8 @@ public final class JsonConfig extends Properties {
         objectMapperRegistry.put(clazz, mapper);
     }
 
-    public ObjectMapper getConverter(Class<?> clazz) {
+
+    public ObjectMapper getObjectMapper(Class<?> clazz) {
         return objectMapperRegistry.get(clazz);
     }
 }

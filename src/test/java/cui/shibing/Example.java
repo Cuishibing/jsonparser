@@ -1,5 +1,7 @@
 package cui.shibing;
 
+import java.util.List;
+
 import cui.shibing.config.JsonConfig;
 import cui.shibing.converter.ObjectMapper;
 import cui.shibing.json.JsonArray;
@@ -13,10 +15,10 @@ public class Example {
 
         JsonConfig config = JsonConfig.getDefaultConfig();
 
-        ObjectMapper converter = config.getConverter(JsonArray.class);
+        ObjectMapper converter = config.getObjectMapper(JsonArray.class);
 
-        Object map = converter.map(jsonObject, float.class);
+        List<Number> values = converter.map(jsonObject, Long.class);
 
-        System.out.println(map);
+        System.out.println(values);
     }
 }

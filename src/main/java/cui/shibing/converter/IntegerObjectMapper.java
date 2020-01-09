@@ -9,24 +9,25 @@ public class IntegerObjectMapper extends AbstractObjectMapper {
         super(config);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Object map(Object source, Class<?> targetClass) throws IllegalAccessException, InstantiationException {
+    public <T> T map(Object source, Class<?> targetClass) throws IllegalAccessException, InstantiationException {
         Integer s = (Integer) source;
         switch (targetClass.getSimpleName()) {
             case "Long":
             case "long":
-                return Long.valueOf(s);
+                return (T) Long.valueOf(s);
             case "Float":
             case "float":
-                return Float.valueOf(s.toString());
+                return (T) Float.valueOf(s.toString());
             case "Double":
             case "double":
-                return Double.valueOf(s.toString());
+                return (T) Double.valueOf(s.toString());
             case "BigDecimal":
-                return new BigDecimal(s);
+                return (T) new BigDecimal(s);
             case "int":
-                return s;
+                return (T)s;
         }
-        return null;
+        throw new RuntimeException(String.format("not support type [%s] map to [%s]", source.getClass(),targetClass));
     }
 }

@@ -7,13 +7,14 @@ public class StringObjectMapper extends AbstractObjectMapper {
         super(config);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Object map(Object source, Class<?> targetClass) throws IllegalAccessException, InstantiationException {
+    public <T> T map(Object source, Class<?> targetClass) throws IllegalAccessException, InstantiationException {
         String s = (String) source;
         switch (targetClass.getSimpleName()) {
             case "StringBuilder":
-                return new StringBuilder(s);
+                return (T) new StringBuilder(s);
         }
-        return null;
+        throw new RuntimeException(String.format("not support type [%s] map to [%s]", source.getClass(),targetClass));
     }
 }
