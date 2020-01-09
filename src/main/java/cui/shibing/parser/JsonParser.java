@@ -19,10 +19,6 @@ public final class JsonParser {
 
     private JsonConfig config;
 
-    public JsonParser(JsonTokenScanner scanner) {
-        this(scanner, JsonConfig.getDefaultConfig());
-    }
-
     public JsonParser(JsonTokenScanner scanner, JsonConfig config) {
         this.scanner = scanner;
         this.config = config;
@@ -113,7 +109,7 @@ public final class JsonParser {
         if (interceptor == null) {
             interceptor = JsonConfig.getDefaultConfig().getInterceptor(token.getType());
         }
-        return interceptor.onToken(token);
+        return interceptor.onToken(token, config);
     }
 
     /**

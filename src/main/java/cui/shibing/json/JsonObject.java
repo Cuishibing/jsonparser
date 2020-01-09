@@ -9,12 +9,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * JsonObj
@@ -22,6 +19,13 @@ import java.util.Objects;
 public class JsonObject {
 
     private Map<String, Object> attrs;
+
+    public Set<String> keySet() {
+        if (attrs == null) {
+            return Collections.emptySet();
+        }
+        return attrs.keySet();
+    }
 
     public Object get(String key) {
         if (attrs == null) {
@@ -36,6 +40,14 @@ public class JsonObject {
 
     public Long getLong(String key) {
         return (Long) get(key);
+    }
+
+    public Integer getInteger(String key) {
+        return (Integer) get(key);
+    }
+
+    public Number getNumber(String key) {
+        return (Number) get(key);
     }
 
     public BigDecimal getBigDecimal(String key) {
@@ -67,16 +79,38 @@ public class JsonObject {
 
     @Override
     public String toString() {
-        return Objects.toString(attrs);
+        StringBuilder builder = new StringBuilder();
+        builder.append('{');
+        if (attrs != null) {
+            attrs.forEach((k, v) -> {
+                builder.append('\"')
+                        .append(k)
+                        .append('\"')
+                        .append(':');
+                if (v instanceof JsonObject || v instanceof JsonArray) {
+                    builder.append(v);
+                } else {
+                    builder.append('\"')
+                            .append(v)
+                            .append('\"');
+                }
+                builder.append(',');
+            });
+            if (attrs.size() > 0) {
+                builder.deleteCharAt(builder.length() - 1);
+            }
+        }
+        builder.append("}");
+        return builder.toString();
     }
 
 
     public static JsonObject parseJsonObject(Reader reader) {
-        return parseJsonObject(reader,JsonConfig.getDefaultConfig());
+        return parseJsonObject(reader, JsonConfig.getDefaultConfig());
     }
 
     public static JsonObject parseJsonObject(Reader reader, JsonConfig config) {
-        JsonParser jsonParser = new JsonParser(new JsonTokenScanner(reader),config);
+        JsonParser jsonParser = new JsonParser(new JsonTokenScanner(reader), config);
         try {
             return jsonParser.parseJsonObject();
         } catch (IOException e) {
@@ -85,17 +119,21 @@ public class JsonObject {
     }
 
     public static JsonObject parseJsonObject(String json) {
-        return parseJsonObject(json,JsonConfig.getDefaultConfig());
+        return parseJsonObject(json, JsonConfig.getDefaultConfig());
     }
 
     public static JsonObject parseJsonObject(String json, JsonConfig config) {
-        return parseJsonObject(new InputStreamReader(new ByteArrayInputStream(json.getBytes())),config);
+        return parseJsonObject(new InputStreamReader(new ByteArrayInputStream(json.getBytes())), config);
     }
 
     public static JsonObject parseJsonObject(URI uri) throws IOException {
+        return parseJsonObject(uri, JsonConfig.getDefaultConfig());
+    }
+
+    public static JsonObject parseJsonObject(URI uri, JsonConfig config) throws IOException {
         URL url = uri.toURL();
         try (Reader reader = new InputStreamReader(url.openStream())) {
-            return parseJsonObject(reader);
+            return parseJsonObject(reader, config);
         }
     }
 

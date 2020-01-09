@@ -1,37 +1,22 @@
 package cui.shibing;
 
 import cui.shibing.config.JsonConfig;
-import cui.shibing.intercepter.Interceptor;
-import cui.shibing.json.JsonArray;
+import cui.shibing.converter.ObjectMapper;
 import cui.shibing.json.JsonObject;
-import cui.shibing.token.JsonToken;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 public class Example {
-    public static void main(String[] args) throws URISyntaxException, IOException {
-        final JsonConfig jsonConfig = new JsonConfig();
-        jsonConfig.registerInterceptor(JsonToken.TokenType.STR, (Interceptor<String>) token ->
-                token.getContent() + "_modify");
+    public static void main(String[] args) throws InstantiationException, IllegalAccessException {
 
-        String json = "{\"name\":\"aabbccdd\",\"age\":\"jljkl\"}";
+        String json = "{\"age\":1,\"aa\":{\"age\":24,\"aa\":{\"name\":\"name222\"}}}";
 
-        JsonObject jsonObject = JsonObject.parseJsonObject(json,jsonConfig);
+        JsonObject jsonObject = JsonObject.parseJsonObject(json);
 
-        System.out.println(jsonObject.getString("name"));
-        System.out.println(jsonObject.getString("age"));
+        JsonConfig config = JsonConfig.getDefaultConfig();
 
-        json = "[1,2,3,1.123e+12]";
+        ObjectMapper converter = config.getConverter(JsonObject.class);
 
-        JsonArray jsonArray = JsonArray.parseJsonArray(json,jsonConfig);
-        System.out.println(jsonArray.getLong(0));
-        System.out.println(jsonArray.getDouble(3));
+        Person person = (Person) converter.map(jsonObject, Person.class);
 
-        // read json from a uri
-        URI jsonUri = new URI("file:///c:/Users/Cuishibing/Desktop/temp/temp.json");
-        jsonObject = JsonObject.parseJsonObject(jsonUri);
-        System.out.println(jsonObject.getString("name"));
+        System.out.println(person);
     }
 }

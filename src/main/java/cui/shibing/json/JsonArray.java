@@ -13,7 +13,6 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class JsonArray {
     private List<Object> attrs;
@@ -40,6 +39,14 @@ public class JsonArray {
         return (Long) get(key);
     }
 
+    public Integer getInteger(int key) {
+        return (Integer) get(key);
+    }
+
+    public Number getNumber(int key) {
+        return (Number) get(key);
+    }
+
     public BigDecimal getBigDecimal(int key) {
         return (BigDecimal) get(key);
     }
@@ -62,7 +69,28 @@ public class JsonArray {
 
     @Override
     public String toString() {
-        return Objects.toString(attrs);
+        StringBuilder builder = new StringBuilder();
+        builder.append('[');
+
+
+        if (attrs != null) {
+            attrs.forEach(v -> {
+                if (v instanceof JsonObject || v instanceof JsonArray) {
+                    builder.append(v);
+                } else {
+                    builder.append('\"')
+                            .append(v)
+                            .append('\"');
+                }
+                builder.append(',');
+            });
+            if (attrs.size() > 0) {
+                builder.deleteCharAt(builder.length() - 1);
+            }
+        }
+
+        builder.append(']');
+        return builder.toString();
     }
 
     public static JsonArray parseJsonArray(Reader reader) {
@@ -89,7 +117,14 @@ public class JsonArray {
     public static JsonArray parseJsonArray(URI uri) throws IOException {
         URL url = uri.toURL();
         try (Reader reader = new InputStreamReader(url.openStream())) {
-            return parseJsonArray(reader);
+            return parseJsonArray(reader, JsonConfig.getDefaultConfig());
+        }
+    }
+
+    public static JsonArray parseJsonArray(URI uri, JsonConfig config) throws IOException {
+        URL url = uri.toURL();
+        try (Reader reader = new InputStreamReader(url.openStream())) {
+            return parseJsonArray(reader, config);
         }
     }
 
