@@ -17,6 +17,10 @@ import java.util.List;
 public class JsonArray {
     private List<Object> attrs;
 
+    public int size() {
+        return attrs != null ? attrs.size() : 0;
+    }
+
     public void add(Object attr) {
         if (attrs == null) {
             attrs = new ArrayList<>();

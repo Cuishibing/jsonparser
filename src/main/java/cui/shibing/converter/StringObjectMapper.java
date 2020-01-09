@@ -10,8 +10,9 @@ public class StringObjectMapper extends AbstractObjectMapper {
     @Override
     public Object map(Object source, Class<?> targetClass) throws IllegalAccessException, InstantiationException {
         String s = (String) source;
-        if (targetClass == StringBuilder.class) {
-            return new StringBuilder(s);
+        switch (targetClass.getSimpleName()) {
+            case "StringBuilder":
+                return new StringBuilder(s);
         }
         return null;
     }

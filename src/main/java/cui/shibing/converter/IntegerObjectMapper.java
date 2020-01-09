@@ -12,17 +12,20 @@ public class IntegerObjectMapper extends AbstractObjectMapper {
     @Override
     public Object map(Object source, Class<?> targetClass) throws IllegalAccessException, InstantiationException {
         Integer s = (Integer) source;
-        if (targetClass == Long.class) {
-            return Long.valueOf(s);
-        }
-        if (targetClass == Float.class) {
-            return Float.valueOf(s.toString());
-        }
-        if (targetClass == Double.class) {
-            return Double.valueOf(s.toString());
-        }
-        if (targetClass == BigDecimal.class) {
-            return new BigDecimal(s);
+        switch (targetClass.getSimpleName()) {
+            case "Long":
+            case "long":
+                return Long.valueOf(s);
+            case "Float":
+            case "float":
+                return Float.valueOf(s.toString());
+            case "Double":
+            case "double":
+                return Double.valueOf(s.toString());
+            case "BigDecimal":
+                return new BigDecimal(s);
+            case "int":
+                return s;
         }
         return null;
     }

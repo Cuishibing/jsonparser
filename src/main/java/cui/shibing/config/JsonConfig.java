@@ -6,6 +6,7 @@ import cui.shibing.intercepter.BooleanTokenInterceptor;
 import cui.shibing.intercepter.Interceptor;
 import cui.shibing.intercepter.NumberTokenInterceptor;
 import cui.shibing.intercepter.StringTokenInterceptor;
+import cui.shibing.json.JsonArray;
 import cui.shibing.json.JsonObject;
 import cui.shibing.token.JsonToken;
 
@@ -31,6 +32,7 @@ public final class JsonConfig extends Properties {
         registerInterceptor(JsonToken.TokenType.NUMBER, new NumberTokenInterceptor());
 
         registerObjectMapper(JsonObject.class, new JsonObjectObjectMapper(this));
+        registerObjectMapper(JsonArray.class ,new JsonArrayObjectMapper(this));
         registerObjectMapper(String.class, new StringObjectMapper(this));
         registerObjectMapper(Integer.class, new IntegerObjectMapper(this));
         registerObjectMapper(Long.class, new LongObjectMapper(this));

@@ -2,21 +2,21 @@ package cui.shibing;
 
 import cui.shibing.config.JsonConfig;
 import cui.shibing.converter.ObjectMapper;
-import cui.shibing.json.JsonObject;
+import cui.shibing.json.JsonArray;
 
 public class Example {
     public static void main(String[] args) throws InstantiationException, IllegalAccessException {
 
-        String json = "{\"age\":1,\"aa\":{\"age\":24,\"aa\":{\"name\":\"name222\"}}}";
+        String json = "[1,2,3,444444,55555,66666]";
 
-        JsonObject jsonObject = JsonObject.parseJsonObject(json);
+        JsonArray jsonObject = JsonArray.parseJsonArray(json);
 
         JsonConfig config = JsonConfig.getDefaultConfig();
 
-        ObjectMapper converter = config.getConverter(JsonObject.class);
+        ObjectMapper converter = config.getConverter(JsonArray.class);
 
-        Person person = (Person) converter.map(jsonObject, Person.class);
+        Object map = converter.map(jsonObject, float.class);
 
-        System.out.println(person);
+        System.out.println(map);
     }
 }

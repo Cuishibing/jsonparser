@@ -13,14 +13,14 @@ public class LongObjectMapper extends AbstractObjectMapper {
     @Override
     public Object map(Object source, Class<?> targetClass) throws IllegalAccessException, InstantiationException {
         Long s = (Long) source;
-        if (targetClass == Double.class) {
-            return Double.valueOf(s.toString());
-        }
-        if (targetClass == Date.class) {
-            return new Date(s);
-        }
-        if (targetClass == BigDecimal.class) {
-            return new BigDecimal(s);
+        switch (targetClass.getSimpleName()) {
+            case "Double":
+            case "double":
+                return Double.valueOf(s.toString());
+            case "Date":
+                return new Date(s);
+            case "BigDecimal":
+                return new BigDecimal(s);
         }
         return null;
     }

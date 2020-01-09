@@ -15,6 +15,9 @@ public class JsonArrayObjectMapper extends AbstractObjectMapper {
         JsonArray s = (JsonArray) source;
         ArrayList<Object> result = new ArrayList<>();
 
+        for (int i = 0; i < s.size(); i++) {
+            result.add(mapValue(s.get(i), targetClass));
+        }
         return result;
     }
 }
