@@ -1,24 +1,21 @@
 package cui.shibing;
 
-import java.util.List;
-
-import cui.shibing.config.JsonConfig;
-import cui.shibing.converter.ObjectMapper;
 import cui.shibing.json.JsonArray;
 
-public class Example {
-    public static void main(String[] args) throws InstantiationException, IllegalAccessException {
+import java.util.List;
 
-        String json = "[1,2,3,444444,55555,66666]";
+public class Example<T> {
 
-        JsonArray jsonObject = JsonArray.parseJsonArray(json);
 
-        JsonConfig config = JsonConfig.getDefaultConfig();
+    public static void main(String[] args) {
 
-        ObjectMapper converter = config.getObjectMapper(JsonArray.class);
+        String json = "[1,\"haha\",{},{\"key\":1.23e+12}]";
 
-        List<Number> values = converter.map(jsonObject, Long.class);
+        JsonArray jsonArray = JsonArray.parseJsonArray(json);
 
-        System.out.println(values);
+        List<Object> list = jsonArray.mapTo(List.class);
+
+        System.out.println(list);
+
     }
 }

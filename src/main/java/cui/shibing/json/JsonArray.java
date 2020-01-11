@@ -1,6 +1,7 @@
 package cui.shibing.json;
 
 import cui.shibing.config.JsonConfig;
+import cui.shibing.converter.ObjectMapper;
 import cui.shibing.parser.JsonParser;
 import cui.shibing.scanner.JsonTokenScanner;
 
@@ -8,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URL;
@@ -95,6 +97,19 @@ public class JsonArray {
 
         builder.append(']');
         return builder.toString();
+    }
+
+    public <T> T mapTo(Type type) {
+        return mapTo(type,JsonConfig.getDefaultConfig());
+    }
+
+    public <T> T mapTo(Type type,JsonConfig config){
+        ObjectMapper objectMapper = config.getObjectMapper(JsonArray.class);
+        try {
+            return objectMapper.map(this,type);
+        } catch (IllegalAccessException | InstantiationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static JsonArray parseJsonArray(Reader reader) {
