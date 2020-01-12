@@ -39,6 +39,7 @@ public final class JsonConfig extends Properties {
         registerObjectMapper(Integer.class, new IntegerObjectMapper(this));
         registerObjectMapper(Long.class, new LongObjectMapper(this));
         registerObjectMapper(Double.class, new DoubleObjectMapper(this));
+        registerObjectMapper(Boolean.class, new BooleanObjectMapper(this));
     }
 
     public void registerInterceptor(JsonToken.TokenType type, Interceptor<?> interceptor) {
