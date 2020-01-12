@@ -13,19 +13,21 @@ public class LongObjectMapper extends AbstractObjectMapper {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T map(Object source, Type type) throws IllegalAccessException, InstantiationException {
+    public <T> T map(Object source, Type type) {
         Long s = (Long) source;
         if (type instanceof Class) {
-            switch (((Class)type).getSimpleName()) {
+            switch (((Class) type).getSimpleName()) {
                 case "Double":
                 case "double":
-                    return (T)Double.valueOf(s.toString());
+                    return (T) Double.valueOf(s.toString());
                 case "Date":
-                    return (T)new Date(s);
+                    return (T) new Date(s);
                 case "BigDecimal":
-                    return (T)new BigDecimal(s);
+                    return (T) new BigDecimal(s);
+                case "String":
+                    return (T) s.toString();
             }
         }
-        throw new RuntimeException(String.format("not support type [%s] map to [%s]", source.getClass(),type));
+        throw new RuntimeException(String.format("not support type [%s] map to [%s]", source.getClass(), type));
     }
 }

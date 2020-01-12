@@ -12,10 +12,12 @@ public class DoubleObjectMapper extends AbstractObjectMapper {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T map(Object source, Type type) throws IllegalAccessException, InstantiationException {
+    public <T> T map(Object source, Type type) {
         if (type == BigDecimal.class) {
-            return (T)BigDecimal.valueOf((Double) source);
+            return (T) BigDecimal.valueOf((Double) source);
+        } else if (type == String.class) {
+            return (T) source.toString();
         }
-        throw new RuntimeException(String.format("not support type [%s] map to [%s]", source.getClass(),type));
+        throw new RuntimeException(String.format("not support type [%s] map to [%s]", source.getClass(), type));
     }
 }

@@ -9,8 +9,9 @@ public class BooleanObjectMapper extends AbstractObjectMapper {
         super(config);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public <T> T map(Object source, Type type) throws IllegalAccessException, InstantiationException {
+    public <T> T map(Object source, Type type) {
         Boolean s = (Boolean) source;
         if (type instanceof Class) {
             Class<?> clazz = (Class<?>) type;
@@ -18,6 +19,8 @@ public class BooleanObjectMapper extends AbstractObjectMapper {
                 case "Boolean":
                 case "boolean":
                     return (T) s;
+                case "String":
+                    return (T) s.toString();
             }
         }
         throw new RuntimeException(String.format("not support type [%s] map to [%s]", source.getClass(), type));

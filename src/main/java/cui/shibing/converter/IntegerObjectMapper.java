@@ -3,7 +3,6 @@ package cui.shibing.converter;
 import cui.shibing.config.JsonConfig;
 
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
 
 public class IntegerObjectMapper extends AbstractObjectMapper {
     public IntegerObjectMapper(JsonConfig config) {
@@ -12,7 +11,7 @@ public class IntegerObjectMapper extends AbstractObjectMapper {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T map(Object source, Type type) throws IllegalAccessException, InstantiationException {
+    public <T> T map(Object source, Type type){
         Integer s = (Integer) source;
         if (type instanceof Class) {
             Class<?> clazz = (Class<?>) type;
@@ -26,8 +25,6 @@ public class IntegerObjectMapper extends AbstractObjectMapper {
                 case "Double":
                 case "double":
                     return (T) Double.valueOf(s.toString());
-                case "BigDecimal":
-                    return (T) new BigDecimal(s);
                 case "int":
                     return (T) s;
                 case "String":

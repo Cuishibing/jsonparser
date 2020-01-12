@@ -18,7 +18,7 @@ public abstract class AbstractObjectMapper implements ObjectMapper {
         this.config = config;
     }
 
-    protected Object mapValue(Object value, Type type) throws InstantiationException, IllegalAccessException {
+    protected Object mapValue(Object value, Type type) {
         if (value == null) {
             return null;
         }

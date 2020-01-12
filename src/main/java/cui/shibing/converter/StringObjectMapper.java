@@ -11,7 +11,7 @@ public class StringObjectMapper extends AbstractObjectMapper {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T map(Object source, Type type) throws IllegalAccessException, InstantiationException {
+    public <T> T map(Object source, Type type) {
         String s = (String) source;
         if (type instanceof Class) {
             switch (((Class<?>) type).getSimpleName()) {
@@ -20,6 +20,8 @@ public class StringObjectMapper extends AbstractObjectMapper {
                 case "int":
                 case "Integer":
                     return (T) Integer.valueOf(s);
+                case "String":
+                    return (T) s;
             }
         }
         throw new RuntimeException(String.format("not support type [%s] map to [%s]", source.getClass(), type));

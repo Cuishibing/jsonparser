@@ -82,44 +82,13 @@ public class JsonObject {
         attrs.put(key, attr);
     }
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append('{');
-        if (attrs != null) {
-            attrs.forEach((k, v) -> {
-                builder.append('\"')
-                        .append(k)
-                        .append('\"')
-                        .append(':');
-                if (v instanceof JsonObject || v instanceof JsonArray) {
-                    builder.append(v);
-                } else {
-                    builder.append('\"')
-                            .append(v)
-                            .append('\"');
-                }
-                builder.append(',');
-            });
-            if (attrs.size() > 0) {
-                builder.deleteCharAt(builder.length() - 1);
-            }
-        }
-        builder.append("}");
-        return builder.toString();
-    }
-
     public <T> T mapTo(Type type) {
-        return mapTo(type,JsonConfig.getDefaultConfig());
+        return mapTo(type, JsonConfig.getDefaultConfig());
     }
 
-    public <T> T mapTo(Type type,JsonConfig config){
+    public <T> T mapTo(Type type, JsonConfig config) {
         ObjectMapper objectMapper = config.getObjectMapper(JsonObject.class);
-        try {
-            return objectMapper.map(this,type);
-        } catch (IllegalAccessException | InstantiationException e) {
-            throw new RuntimeException(e);
-        }
+        return objectMapper.map(this, type);
     }
 
 
