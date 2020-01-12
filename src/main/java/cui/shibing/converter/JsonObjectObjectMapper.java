@@ -72,7 +72,6 @@ public class JsonObjectObjectMapper extends AbstractObjectMapper implements Obje
         return instance;
     }
 
-    @SuppressWarnings("unchecked")
     private Object mapToBean(JsonObject jsonObject, Class<?> clazz, Type type) throws IllegalAccessException, InstantiationException {
         if (clazz.isInterface()) {
             throw new RuntimeException(String.format("type [%s] is interface or abstract class", type));

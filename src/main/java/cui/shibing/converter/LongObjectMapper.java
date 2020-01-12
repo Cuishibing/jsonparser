@@ -16,7 +16,7 @@ public class LongObjectMapper extends AbstractObjectMapper {
     public <T> T map(Object source, Type type) {
         Long s = (Long) source;
         if (type instanceof Class) {
-            switch (((Class) type).getSimpleName()) {
+            switch (((Class<?>) type).getSimpleName()) {
                 case "Double":
                 case "double":
                     return (T) Double.valueOf(s.toString());
