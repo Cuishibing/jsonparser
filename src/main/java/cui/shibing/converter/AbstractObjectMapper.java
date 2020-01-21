@@ -1,6 +1,7 @@
 package cui.shibing.converter;
 
 import cui.shibing.config.JsonConfig;
+import cui.shibing.converter.reflection.ReflectionUtils;
 import cui.shibing.json.JsonArray;
 import cui.shibing.json.JsonObject;
 
@@ -49,12 +50,6 @@ public abstract class AbstractObjectMapper implements ObjectMapper {
     }
 
     protected Class<?> getRawType(Type type) {
-        if (type instanceof Class) {
-            return (Class<?>) type;
-        }
-        if (type instanceof ParameterizedType) {
-            return getRawType(((ParameterizedType) type).getRawType());
-        }
-        throw new RuntimeException(String.format("not support type [%s]", type));
+        return ReflectionUtils.getRawType(type);
     }
 }

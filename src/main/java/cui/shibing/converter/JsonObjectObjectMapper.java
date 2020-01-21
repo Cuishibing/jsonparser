@@ -1,6 +1,7 @@
 package cui.shibing.converter;
 
 import cui.shibing.config.JsonConfig;
+import cui.shibing.converter.reflection.ClassInfo;
 import cui.shibing.converter.reflection.ReflectionUtils;
 import cui.shibing.json.JsonArray;
 import cui.shibing.json.JsonObject;
@@ -78,7 +79,7 @@ public class JsonObjectObjectMapper extends AbstractObjectMapper implements Obje
         }
         Object instance = clazz.newInstance();
         for (String k : jsonObject.keySet()) {
-            ReflectionUtils.ClassInfo classInfo = ReflectionUtils.getClassInfo(clazz);
+            ClassInfo classInfo = ReflectionUtils.getClassInfo(clazz);
             Object field = classInfo.getField(k);
             if (field == ReflectionUtils.NON_FIELD) {
                 // ignore un known property
