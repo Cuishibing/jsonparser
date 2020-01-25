@@ -1,23 +1,77 @@
 package cui.shibing.converter.reflection;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
+
+import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.Map;
 
 import static cui.shibing.converter.reflection.ReflectionUtils.*;
 
 public class ClassInfo {
-    private Type type;
+
     private Class<?> rawType;
     private Map<String, Object> fieldMap = new HashMap<>();
     private Map<String, Object> fieldMethodMap = new HashMap<>();
 
     public ClassInfo(Type type) {
-        this.type = type;
         rawType = ReflectionUtils.getRawType(type);
+    }
+
+    public Type getFieldParameterizedType(Field field, Type currentType) {
+        Class<?> declaringClass = field.getDeclaringClass();
+        Type genericType = field.getGenericType();
+        if (genericType instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) genericType;
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+            for (int i = 0; i < actualTypeArguments.length; i++) {
+                Type actualTypeArgument = actualTypeArguments[i];
+                if (actualTypeArgument instanceof TypeVariable) {
+                    String name = actualTypeArgument.getTypeName();
+                    Type t = getParameterTypeByName(name, currentType, declaringClass);
+                    actualTypeArguments[i] = t;
+                }
+            }
+            return ParameterizedTypeImpl.make(field.getType(), actualTypeArguments, parameterizedType.getOwnerType());
+        } else {
+            if (genericType instanceof TypeVariable) {
+                return getParameterTypeByName(genericType.getTypeName(), currentType, declaringClass);
+            } else {
+                return genericType;
+            }
+        }
+    }
+
+    private Type getParameterTypeByName(String name, Type currentType, Class<?> declaringClass) {
+        TypeVariable<? extends Class<?>>[] typeParameters = declaringClass.getTypeParameters();
+        int index = -1;
+        for (int i = 0; i < typeParameters.length; i++) {
+            if (typeParameters[i].getName().equals(name)) {
+                index = i;
+                break;
+            }
+        }
+        Type type = getClosetGenericSuperclass(currentType);
+        if (type instanceof ParameterizedType) {
+            return ((ParameterizedType) type).getActualTypeArguments()[index];
+        } else if (type instanceof TypeVariable){
+            Type[] bounds = ((TypeVariable) type).getBounds();
+            return bounds[0];
+        } else return null;
+    }
+
+    private Type getClosetGenericSuperclass(Type type) {
+        Type genericSuperClass = type;
+        Class<?> rawType = getRawType(type);
+        while (!(genericSuperClass instanceof ParameterizedType)) {
+            genericSuperClass = rawType.getGenericSuperclass();
+            if (rawType.getSuperclass() != Object.class) {
+                rawType = rawType.getSuperclass();
+            } else {
+                break;
+            }
+        }
+        return genericSuperClass;
     }
 
     public Object getField(String name) {
@@ -32,7 +86,7 @@ public class ClassInfo {
             if (field == null) {
                 Class<?> superClazz = rawType.getSuperclass();
                 if (superClazz != null && superClazz != Object.class) {
-                    field = ReflectionUtils.getClassInfo(rawType.getSuperclass()).getField(name);
+                    field = ReflectionUtils.getClassInfo(superClazz).getField(name);
                 }
             }
             if (field == null) {

@@ -5,7 +5,6 @@ import cui.shibing.converter.reflection.ReflectionUtils;
 import cui.shibing.json.JsonArray;
 import cui.shibing.json.JsonObject;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;

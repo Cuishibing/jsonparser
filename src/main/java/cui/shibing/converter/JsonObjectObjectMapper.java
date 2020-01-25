@@ -9,7 +9,6 @@ import cui.shibing.json.JsonObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -86,14 +85,7 @@ public class JsonObjectObjectMapper extends AbstractObjectMapper implements Obje
                 continue;
             }
             Field f = (Field) field;
-            Type t;
-            if (f.getGenericType() instanceof TypeVariable) {
-                // can not get more detail type info
-                t = f.getType();
-            } else {
-                t = f.getGenericType();
-            }
-            classInfo.setValue(f, instance, mapValue(jsonObject.get(k), t));
+            classInfo.setValue(f, instance, mapValue(jsonObject.get(k),classInfo.getFieldParameterizedType(f,type)));
         }
         return instance;
     }

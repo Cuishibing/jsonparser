@@ -3,6 +3,7 @@ package cui.shibing.converter;
 import cui.shibing.config.JsonConfig;
 
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 
 public class IntegerObjectMapper extends AbstractObjectMapper {
     public IntegerObjectMapper(JsonConfig config) {
