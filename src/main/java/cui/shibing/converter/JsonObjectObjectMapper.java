@@ -12,7 +12,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JsonObjectObjectMapper extends AbstractObjectMapper implements ObjectMapper {
+public class JsonObjectObjectMapper extends AbstractObjectMapper {
 
     public JsonObjectObjectMapper(JsonConfig config) {
         super(config);
@@ -31,22 +31,21 @@ public class JsonObjectObjectMapper extends AbstractObjectMapper implements Obje
             }
 
         } else {
-            switch (clazz.getSimpleName()) {
-                case "String":
-                    return (T) mapToString(jsonObject);
-                default:
-                    // java bean
-                    try {
-                        return (T) mapToBean(jsonObject, clazz, type);
-                    } catch (IllegalAccessException | InstantiationException e) {
-                        throw new RuntimeException(e);
-                    }
+            if ("String".equals(clazz.getSimpleName())) {
+                return (T) mapToString(jsonObject);
+            }
+            // java bean
+            try {
+                return (T) mapToBean(jsonObject, clazz, type);
+            } catch (IllegalAccessException | InstantiationException e) {
+                throw new RuntimeException(e);
             }
         }
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, Object> mapToMap(JsonObject jsonObject, Class<?> clazz, Type type) throws IllegalAccessException, InstantiationException {
+    private Map<String, Object> mapToMap(JsonObject jsonObject, Class<?> clazz, Type type)
+            throws IllegalAccessException, InstantiationException {
         Map<String, Object> instance;
         if (clazz.isInterface()) {
             if (clazz == Map.class) {
@@ -72,7 +71,8 @@ public class JsonObjectObjectMapper extends AbstractObjectMapper implements Obje
         return instance;
     }
 
-    private Object mapToBean(JsonObject jsonObject, Class<?> clazz, Type type) throws IllegalAccessException, InstantiationException {
+    private Object mapToBean(JsonObject jsonObject, Class<?> clazz, Type type)
+            throws IllegalAccessException, InstantiationException {
         if (clazz.isInterface()) {
             throw new RuntimeException(String.format("type [%s] is interface or abstract class", type));
         }
@@ -85,7 +85,8 @@ public class JsonObjectObjectMapper extends AbstractObjectMapper implements Obje
                 continue;
             }
             Field f = (Field) field;
-            classInfo.setValue(f, instance, mapValue(jsonObject.get(k),classInfo.getFieldParameterizedType(f,type)));
+            classInfo.setValue(f, instance,
+                    mapValue(jsonObject.get(k), ReflectionUtils.getFieldParameterizedType(f, type)));
         }
         return instance;
     }
@@ -95,10 +96,7 @@ public class JsonObjectObjectMapper extends AbstractObjectMapper implements Obje
         builder.append('{');
 
         for (String k : jsonObject.keySet()) {
-            builder.append("\"")
-                    .append(k)
-                    .append("\"")
-                    .append(":");
+            builder.append("\"").append(k).append("\"").append(":");
             Object v = jsonObject.get(k);
 
             if (v == null) {
@@ -109,7 +107,7 @@ public class JsonObjectObjectMapper extends AbstractObjectMapper implements Obje
             Class<?> vClass = v.getClass();
             ObjectMapper objectMapper = config.getObjectMapper(vClass);
 
-            String vStr = null;
+            String vStr;
             vStr = objectMapper.map(v, String.class);
             if (v instanceof JsonObject || v instanceof JsonArray) {
                 builder.append(vStr);

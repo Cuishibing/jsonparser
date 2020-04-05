@@ -1,17 +1,15 @@
 package cui.shibing.json;
 
-import cui.shibing.config.JsonConfig;
-import cui.shibing.converter.ObjectMapper;
-import cui.shibing.parser.JsonParser;
-import cui.shibing.scanner.JsonTokenScanner;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Type;
-import java.net.URI;
-import java.net.URL;
+
+import cui.shibing.config.JsonConfig;
+import cui.shibing.converter.ObjectMapper;
+import cui.shibing.parser.JsonParser;
+import cui.shibing.scanner.JsonTokenScanner;
 
 public class Json {
     public <T> T mapTo(Type type) {
@@ -44,20 +42,6 @@ public class Json {
         return parseJsonArray(new InputStreamReader(new ByteArrayInputStream(json.getBytes())), config);
     }
 
-    public static JsonArray parseJsonArray(URI uri) throws IOException {
-        URL url = uri.toURL();
-        try (Reader reader = new InputStreamReader(url.openStream())) {
-            return parseJsonArray(reader, JsonConfig.getDefaultConfig());
-        }
-    }
-
-    public static JsonArray parseJsonArray(URI uri, JsonConfig config) throws IOException {
-        URL url = uri.toURL();
-        try (Reader reader = new InputStreamReader(url.openStream())) {
-            return parseJsonArray(reader, config);
-        }
-    }
-
     public static JsonObject parseJsonObject(Reader reader) {
         return parseJsonObject(reader, JsonConfig.getDefaultConfig());
     }
@@ -79,14 +63,4 @@ public class Json {
         return parseJsonObject(new InputStreamReader(new ByteArrayInputStream(json.getBytes())), config);
     }
 
-    public static JsonObject parseJsonObject(URI uri) throws IOException {
-        return parseJsonObject(uri, JsonConfig.getDefaultConfig());
-    }
-
-    public static JsonObject parseJsonObject(URI uri, JsonConfig config) throws IOException {
-        URL url = uri.toURL();
-        try (Reader reader = new InputStreamReader(url.openStream())) {
-            return parseJsonObject(reader, config);
-        }
-    }
 }

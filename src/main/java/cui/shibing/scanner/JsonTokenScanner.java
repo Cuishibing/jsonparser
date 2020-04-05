@@ -1,9 +1,6 @@
 package cui.shibing.scanner;
 
-import cui.shibing.token.BooleanValueToken;
 import cui.shibing.token.JsonToken;
-import cui.shibing.token.NumberValueToken;
-import cui.shibing.token.StringValueToken;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -85,9 +82,9 @@ public final class JsonTokenScanner {
         return (char) (hexToInt(c3) * 4096 + hexToInt(c2) * 256 + hexToInt(c1) * 16 + hexToInt(c0));
     }
 
-    private NumberValueToken readNumberToken() throws IOException {
+    private JsonToken readNumberToken() throws IOException {
         int state = 0;// start state
-        char readChar = 0;
+        char readChar;
         StringBuilder builder = new StringBuilder();
         while (true) {
             switch (state) {
@@ -127,7 +124,7 @@ public final class JsonTokenScanner {
                         break;
                     }
                     buffer.position(buffer.position() - 1);
-                    return new NumberValueToken(builder.toString(), false);
+                    return new JsonToken(JsonToken.TokenType.NUMBER, builder.toString());
                 }
                 case 3: {
                     readChar = readChar();
@@ -142,7 +139,7 @@ public final class JsonTokenScanner {
                         break;
                     }
                     buffer.position(buffer.position() - 1);
-                    return new NumberValueToken(builder.toString(), true);
+                    return new JsonToken(JsonToken.TokenType.NUMBER, builder.toString());
                 }
                 case 4: {
                     readChar = readChar();
@@ -175,7 +172,7 @@ public final class JsonTokenScanner {
                         break;
                     }
                     buffer.position(buffer.position() - 1);
-                    return new NumberValueToken(builder.toString(), true);
+                    return new JsonToken(JsonToken.TokenType.NUMBER, builder.toString());
                 }
             }
         }
@@ -236,7 +233,7 @@ public final class JsonTokenScanner {
                         builder.append(readChar);
                     }
                 } while (readChar != '"');
-                return new StringValueToken(builder.toString());
+                return new JsonToken(JsonToken.TokenType.STR, builder.toString());
             }
             default: {
                 switch (readChar) {
@@ -263,12 +260,12 @@ public final class JsonTokenScanner {
                             readChar = readChar();
                             builder.append(readChar);
                         }
-                        BooleanValueToken t = new BooleanValueToken(builder.toString());
-                        if (t.validBooleanValue()) {
-                            return t;
+                        String s = builder.toString();
+                        if ("true".equals(s) || "false".equals(s)) {
+                            return new JsonToken(JsonToken.TokenType.BOOLEAN, builder.toString());
                         } else {
-                            throw new RuntimeException(String.format("line [%s]: syntax error, invalid bool value [%s]",
-                                    line, t.getContent()));
+                            throw new RuntimeException(String.format("line [%s]: syntax error, invalid boolean value [%s]",
+                                    line, s));
                         }
                     }
                     case 'n': {
