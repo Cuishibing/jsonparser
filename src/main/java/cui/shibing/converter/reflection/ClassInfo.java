@@ -1,20 +1,13 @@
 package cui.shibing.converter.reflection;
 
-import static cui.shibing.converter.reflection.ReflectionUtils.NON_ACCESS;
-import static cui.shibing.converter.reflection.ReflectionUtils.NON_FIELD;
-import static cui.shibing.converter.reflection.ReflectionUtils.NON_METHOD;
-import static cui.shibing.converter.reflection.ReflectionUtils.getRawType;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
+import static cui.shibing.converter.reflection.ReflectionUtils.*;
 
 public class ClassInfo {
 
